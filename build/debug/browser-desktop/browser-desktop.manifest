@@ -1,0 +1,15 @@
+CACHE MANIFEST
+
+#62364cb865664da590013152c2662a6f version debug
+
+CACHE:
+
+resources/images/board.gif
+game.html
+index.html
+browser-desktop.js
+
+FALLBACK:
+
+NETWORK:
+*

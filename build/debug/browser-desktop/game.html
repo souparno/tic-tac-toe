@@ -1,0 +1,1188 @@
+<!DOCTYPE html><html><head><title>tic-tac-toe</title><style>body,html{height:100%;background:#000}body,fieldset,form,html,legend,li,ol,ul{margin:0;padding:0}div{-moz-box-sizing:border-box;-webkit-box-sizing:border-box;-ms-box-sizing:border-box}h1,h2,h3,h4,h5,h6,p{margin-top:0}fieldset,img{border:0}legend{color:#000}li{list-style:none}sup{vertical-align:text-top}sub{vertical-align:text-bottom}table{border-collapse:collapse;border-spacing:0}caption,td,th{text-align:left;vertical-align:top;font-weight:400}input,select,textarea{font-size:110%;line-height:1.1}abbr,acronym{border-bottom:.1em dotted;cursor:help}body{font-family:Helvetica,Tahoma}body,div,span{-webkit-tap-highlight-color:rgba(0,0,0,0);-webkit-user-select:none}
+</style></head><body></body><script>;(function() {
+window.BUILD_TARGET="browser-desktop";
+window.BUILD_ENV="browser";
+window.DEBUG=true;
+window.DEV_MODE=true;
+window.CONFIG={"appID":"62364cb865664da590013152c2662a6f","shortName":"tic-tac-toe","title":"tic-tac-toe","disableNativeViews":false,"target":"browser-desktop","version":"debug","noRedirect":true,"splash":{"autoHide":true},"supportedOrientations":["portrait"],"useDOM":false,"packageName":"com.example.studio.tic-tac-toe","embeddedFonts":[],"bundleID":"example.bundle","sdkVersion":"unknown","localServerURL":"undefined:9200","serverName":"local"};
+window.CONFIG.baseURL = window.location.toString().match(/(.*\/).*$/)[1];
+})();;function bootstrap(initialImport, target) {
+	var w = window;
+	var d = document;
+	var loc = w.location;
+	var q = loc.search + loc.hash;
+
+	// check to see if we need chrome frame
+	// if (target && (target=="desktop" || target=="facebook") && /MSIE/i.test(navigator.userAgent) && !d.createElement('canvas').getContext) {
+	// 	var chromeframe_url = 'chromeframe.html' + (loc.search ? loc.search + "&" : "?") + "target="+ target;
+	// 	bootstrap = function() {};
+	// 	try {
+	// 		var obj = new ActiveXObject('ChromeTab.ChromeFrame');
+	// 		if (!obj) {
+	// 			throw "bad object";
+	// 		}
+	// 		loc.replace(chromeframe_url);
+	// 	} catch(e) {
+	// 		w.onload = function() {
+	// 			var e = d.createElement('script');
+	// 			e.async = true;
+	// 		    e.src = "http://ajax.googleapis.com/ajax/libs/chrome-frame/1/CFInstall.min.js";
+	// 			e.onreadystatechange= function () {
+	// 				if (this.readyState == 'loaded') {
+	// 					CFInstall.check({
+	// 						mode: "overlay",
+	// 						oninstall: function() { loc.replace(chromeframe_url) },
+	// 						url: "http://www.google.com/chromeframe/eula.html?user=true"
+	// 					});
+	// 				}
+	// 			}
+	// 			d.getElementsByTagName('head')[0].appendChild(e);
+	// 		}
+	// 	}
+	// 	return;
+	// }
+
+	// for tracking when the page started loading
+	w.__initialTime = +new Date();
+
+	try {
+		// override any config params provided already
+		if (w.CONFIG_OVERRIDES) {
+			for (var key in w.CONFIG_OVERRIDES) {
+				w.CONFIG[key] = w.CONFIG_OVERRIDES[key];
+			}
+		}
+
+		var uri = decodeURIComponent((w.location.search || '?').substr(1));
+		if (uri[0] == '{') {
+			// override any config params in the URL
+			var overrideCONFIG = JSON.parse(uri);
+			if (overrideCONFIG) {
+				for (var key in overrideCONFIG) {
+					w.CONFIG[key] = overrideCONFIG[key];
+				}
+			}
+		}
+	} catch(e) {
+
+	}
+
+	if (w.CONFIG.CDNURL) {
+		d.write('<base href="' + w.CONFIG.CDNURL + '">');
+	}
+
+	// figure out the dpr
+	if (w.CONFIG.scaleDPR === false) {
+		var scale = 1;
+	} else {
+		var scale = (1 / (w.devicePixelRatio || 1));
+	}
+
+	// figure out the device type
+	var ua = navigator.userAgent;
+	var mobile = (/(iPod|iPhone|iPad)/i.test(ua) ? 'ios' : /BlackBerry/.test(ua) ? 'blackberry' : /Mobile Safari/.test(ua) ? 'android' : '');
+	var isKik = /Kik\/\d/.test(ua);
+
+	// if (loc.search.match(/exportSettings=true/)) {
+	// 	// just export localStorage
+	// 	exportSettings();
+	// } else if (mobile != 'blackberry' && !w.CONFIG.noRedirect) {
+	// 	// redirect based on device
+	// 	if (mobile && target != 'browser-mobile') {
+	// 		return loc.replace('//' + loc.host + '/browser-mobile/' + loc.hash);
+	// 	} else if (!mobile && target == 'browser-mobile') {
+	// 		return loc.replace('//' + loc.host + '/browser-desktop/' + loc.hash);
+	// 	}
+	// }
+
+	// set the viewport
+	if (mobile == 'ios') {
+		// Using initial-scale on android makes everything blurry! I think only IOS
+		// correctly uses devicePixelRatio.  Medium/high-res android seems to set
+		// the dpr to 1.5 across the board, regardless of what the dpr should actually
+		// be...
+		d.write('<meta name="viewport" content="'
+				+ 'user-scalable=no'
+				+ ',initial-scale=' + scale
+				+ ',maximum-scale=' + scale
+				+ ',minimum-scale=' + scale
+				+ ',width=device-width'
+			+ '" />');
+
+		// detect ios operating system version
+		var match = ua.match(/iPhone OS ([0-9]+)/);
+		var iosVersion = match && parseInt(match[1]);
+	}
+
+	if (!Image.get) {
+		Image.set = function(url, img) { CACHE[url] = img; };
+		Image.get = function(url) { return CACHE[url]; };
+	}
+
+	// TODO: Remove this automatic false. Kik does not always show up in the user agent so
+	//       default to not being able to hide the progress bar for now
+	var canHideAddressBar = false && !(iosVersion && iosVersion >= 7) && !isKik && mobile;
+
+	w.hideAddressBar = function() {
+		if (!mobile || !canHideAddressBar) { return; }
+
+		d.body.style.height = 2 * screen.height + 'px';
+		if (mobile == 'ios') {
+			w.scrollTo(0, 1);
+			w.scrollTo(0, 0);
+		} else {
+			w.scrollTo(0, 1);
+		}
+
+		d.body.offsetHeight;
+	}
+
+	hideAddressBar();
+	var min = w.innerHeight;
+
+	var loaded = false;
+	w._continueLoad = function() {
+		if (!loaded) {
+			loaded = true;
+			var el = d.createElement('script');
+			el.src = target + '.js';
+			d.getElementsByTagName('head')[0].appendChild(el);
+		}
+	};
+
+	var fontsLoaded;
+	if (CONFIG.embeddedFonts) {
+		var defaultWidth = 0;
+		var fontNodes = [];
+		for (var i = 0, n = CONFIG.embeddedFonts.length; i < n; ++i) {
+			var font = CONFIG.embeddedFonts[i];
+			var el = d.body.appendChild(d.createElement('span'));
+			el.innerHTML = 'giItT1WQy@!-/#';
+			el.style.cssText = 'position:absolute;left:-9999px;font-size:100px;visibility:hidden;';
+			if (!defaultWidth) {
+				defaultWidth = el.offsetWidth;
+			}
+			el.style.fontFamily = font;
+			fontNodes.push(el);
+		}
+	} else {
+		fontsLoaded = true;
+	}
+
+	var orientationOk = true;
+	var supportedOrientations = CONFIG.supportedOrientations;
+	function checkOrientation() {
+		var ow = w.outerWidth;
+		var oh = w.outerHeight;
+		var isPortrait = oh > ow;
+		orientationOk = isPortrait && supportedOrientations.indexOf('portrait') != -1
+			|| !isPortrait && supportedOrientations.indexOf('landscape') != -1;
+	}
+
+	if (mobile && supportedOrientations) {
+		checkOrientation();
+		// if (!orientationOk) {
+		// 	var el = d.body.appendChild(d.createElement('div'));
+		// 	el.innerHTML = 'please rotate your phone<br><span style="font-size:200%">\u21bb</span>';
+		// 	var width = d.body.offsetWidth;
+		// 	el.style.cssText = 'opacity:0;z-index:9000;color:#FFF;background:rgba(40,40,40,0.8);border-radius:25px;text-align:center;padding:' + width / 10 + 'px;font-size:' + width / 20 + 'px;position:absolute;left:50%;width:' + width * 5 / 8 + 'px;margin-left:-' + width * 5 / 16 + 'px;margin-top:80px;pointer-events:none';
+		// 	w.addEventListener('resize', function () {
+		// 		checkOrientation();
+		// 		el.style.display = orientationOk ? 'none': 'block';
+		// 	});
+		// }
+	}
+
+	var appCache = window.applicationCache;
+	['cached', 'checking', 'downloading', 'error', 'noupdate', 'obsolete', 'progress', 'updateready'].forEach(function (evt) {
+		appCache.addEventListener(evt, handleCacheEvent, false);
+	});
+
+	// status 0 == UNCACHED
+	// if (appCache.status) {
+
+	// 	appCache.update(); // Attempt to update the user's cache.
+	// }
+
+	function handleCacheEvent(evt) {
+		if (evt.type == 'updateready') {
+			// var el = d.body.appendChild(d.createElement('div'));
+			// el.style.cssText = 'opacity:0;position:absolute;z-index:9900000;top:-20px;margin:0px auto'
+			// 	+ 'height:20px;width:200px;'
+			// 	+ '-webkit-border-radius:0px 0px 5px 5px;'
+			// 	+ '-webkit-transition:all 0.7s ease-in-out;'
+			// 	+ '-webkit-transform:scale(' + w.devicePixelRatio + ');'
+			// 	+ '-webkit-transform-origin:50% 0%;'
+			// 	+ '-webkit-box-shadow:0px 2px 3px rgba(0, 0, 0, 0.4);'
+			// 	+ 'background:rgba(0,0,0,0.7);color:#FFF;'
+			// 	+ 'padding:10px 15px;'
+			// 	+ 'font-size: 15px;';
+			// 	+ 'text-align: center;';
+			// 	+ 'cursor:pointer;';
+
+			// if (CONFIG.embeddedFonts && CONFIG.embeddedFonts.length) {
+			// 	el.style.fontFamily = CONFIG.embeddedFonts[0];
+			// }
+
+			// el.innerText = 'game updated! tap here';
+			// el.style.left = (d.body.offsetWidth - 200) / 2 + 'px';
+
+			// el.setAttribute('noCapture', true); // prevent DevKit from stopping clicks on this event
+			// el.addEventListener('click', reload, true);
+			// el.addEventListener('touchstart', reload, true);
+
+			// setTimeout(function () {
+			// 	el.style.top='0px';
+			// 	el.style.opacity='1';
+			// }, 0);
+
+			// setTimeout(function () {
+			// 	el.style.top='-20px';
+			// 	el.style.opacity='0';
+			// }, 30000);
+			console.log("update ready");
+
+			// reload immediately if splash is still visible
+			var splash = d.getElementById('_GCSplash');
+			if (splash && splash.parentNode) {
+				try { appCache.swapCache(); } catch (e) {}
+				//location.reload();
+			}
+		}
+	}
+
+	// after load, we poll for the correct document height
+	w.onload = function() {
+		var now = +new Date();
+		var increased = false;
+		var poll = setInterval(function() {
+			hideAddressBar();
+			// if (orientationOk) {
+				var h = w.innerHeight;
+				if (fontNodes) {
+					var isLoaded = true;
+					for (var i = 0, n = fontNodes.length; i < n; ++i) {
+						if (fontNodes[i].offsetWidth == defaultWidth) {
+							isLoaded = false;
+							break;
+						}
+					}
+
+					if (isLoaded) {
+						fontsLoaded = true;
+					}
+				}
+
+				// timeout after 1 second and assume we have the right height, or
+				// note when the height increases (we scrolled) and launch the app
+				if (h == min && increased && fontsLoaded || +new Date() - now > 5000 || !canHideAddressBar && fontsLoaded) {
+					if (mobile == 'android') {
+						w.scrollTo(0, -1);
+					}
+
+					clearInterval(poll);
+
+					setTimeout(function () {
+						jsio("import gc.browser.bootstrap.launchBrowser");
+					}, 0);
+				}
+
+				// some android phones report correctly first, then shrink the height
+				// to fit the address bar. always reset min
+				if (h > min) { increased = true; }
+				min = h;
+			// }
+		}, 50);
+	}
+}
+;bootstrap("gc.browser.launchClient", "browser-desktop");// Copyright (c) 2010
+// Michael Carter (cartermichael@gmail.com)
+// Martin Hunt (mghunt@gmail.com)
+// 
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+// 
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+// 
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+
+// Initialization of js.io occurs in a closure, preventing local variables
+// from entering the global scope.  During execution, the method `jsio` is
+// added to the global scope.
+
+;(function() {
+	function init(cloneFrom) {
+		// We expect this code to be minified before production use, so we may
+		// write code slightly more verbosely than we otherwise would.
+	
+		// Should we parse syntax errors in the browser?
+		var DEBUG = true;
+	
+		// Store a reference to the slice function for converting objects of
+		// type arguments to type array.
+		var SLICE = Array.prototype.slice;
+	
+		// js.io supports multiple JavaScript environments such as node.js and
+		// most web browsers (IE, Firefox, WebKit).  The ENV object wraps 
+		// any utility functions that contain environment-specific code (e.g.
+		// reading a file using node's `fs` library or a browser's
+		// `XMLHttpRequest`).  Running js.io in other JavaScript environments
+		// is as easy as implementing an environment object that conforms to 
+		// the abstract interface for an environment (provided below) and 
+		// calling `jsio.setEnv()`.
+		var ENV;
+	
+		// Checks if the last character in a string is `/`.
+		var rexpEndSlash = /\/|\\$/;
+
+		function getModuleDef (path) {
+			path += '.js';
+			return jsio.__modules[path] || new ModuleDef(path);
+		}
+	
+		// Creates an object containing metadata about a module.
+		function ModuleDef (path) {
+			this.path = path;
+			this.friendlyPath = path;
+			util.splitPath(path, this);
+		};
+
+		ModuleDef.prototype.setBase = function (baseMod, basePath) {
+			this.baseMod = baseMod;
+			this.basePath = basePath;
+		};
+	
+		// Utility functions
+		var util = {
+				// `util.bind` returns a function that, when called, will execute
+				// the method passed in with the provided context and any additional
+				// arguments passed to `util.bind`.
+				//       util.bind(obj, 'f', a) -> function() { return obj.f(a); }
+				//       util.bind(obj, g, a, b, c) -> function() { return g.call(g, a, b, c); }
+				bind: function(context, method/*, args... */) {
+					var args = SLICE.call(arguments, 2);
+					return function() {
+						method = (typeof method == 'string' ? context[method] : method);
+						return method.apply(context, args.concat(SLICE.call(arguments, 0)));
+					};
+				},
+			
+				// `util.addEndSlash` accepts a string.  That string is returned with a `/`
+				// appended if the string did not already end in a `/`.
+				addEndSlash: function(str) {
+					return rexpEndSlash.test(str) ? str : str + '/';
+				},
+			
+				// `util.removeEndSlash` accepts a string.  It removes a trailing `/` if
+				// one is found.
+				removeEndSlash: function(str) {
+					return str.replace(rexpEndSlash, '');
+				},
+			
+				// `util.makeRelativePath` accepts two paths (strings) and returns the first path
+				// made relative to the second.  Note: this function needs some work.  It currently
+				// handles the most common use cases, but may fail in unexpected edge cases.
+				// 
+				//  - Simple case: if `path` starts with `relativeTo`, then we can strip `path` 
+				// off the `relativeTo` part and we're done.
+				//
+				//         util.makeRelativePath('abc/def/', 'abc') -> 'def'
+				//
+				//  - Harder case: `path` starts with some substring of `relativeTo`.  We want to remove this substring and then add `../` for each remaining segment of `relativeTo`.
+				//
+				//         util.makeRelativePath('abc/def/', 'abc/hij') -> '../def'
+				//
+				makeRelativePath: function(path, relativeTo) {
+					var len = relativeTo.length;
+					if (path.substring(0, len) == relativeTo) {
+						/* Note: we're casting a boolean to an int by adding len to it */
+						return path.slice((path.charAt(len) == ENV.pathSep) + len);
+					}
+				
+					var sA = util.removeEndSlash(path).split(ENV.pathSep),
+						sB = util.removeEndSlash(relativeTo).split(ENV.pathSep),
+						i = 0;
+				
+					/* Count how many segments match. */
+					while(sA[i] == sB[i]) { ++i; }
+				
+					if (i) {
+						/* If at least some segments matched, remove them.  The result is our new path. */
+						path = sA.slice(i).join(ENV.pathSep);
+					
+						/* Prepend `../` for each segment remaining in `relativeTo`. */
+						for (var j = sB.length - i; j > 0; --j) { path = '../' + path; }
+					}
+				
+					return path;
+				},
+			
+				// `buildPath` accepts an arbitrary number of string arguments to concatenate into a path.
+				//     util.buildPath('a', 'b', 'c/', 'd/') -> 'a/b/c/d/'
+				buildPath: function() {
+					var args = Array.prototype.filter.call(arguments, function (x) { return x; });
+					return util.resolveRelativePath(args.join('/'));
+				},
+			
+				// `resolveRelativePath` removes relative path indicators.  For example:
+				//     util.resolveRelativePath('a/../b') -> b
+				resolveRelativePath: function(path) {
+					/* If the path starts with a protocol, store it and remove it (add it
+					   back later) so we don't accidently modify it. */
+					var protocol = path.match(/^(\w+:\/\/)(.*)$/);
+					if (protocol) { path = protocol[2]; }
+				
+					/* Remove multiple slashes and trivial dots (`/./ -> /`). */
+					path = path.replace(/\/+/g, '/').replace(/\/\.\//g, '/');
+				
+					/* Loop to collapse instances of `../` in the path by matching a previous
+					   path segment.  Essentially, we find substrings of the form `/abc/../`
+					   where abc is not `.` or `..` and replace the substrings with `/`.
+					   We loop until the string no longer changes since after collapsing
+					   possible instances once, we may have created more instances that can
+					   be collapsed.
+					*/
+					var o;
+					while((o = path) != (path = path.replace(/(^|\/)(?!\.?\.\/)([^\/]+)\/\.\.\//g, '$1'))) {}
+					/* Don't forget to prepend any protocol we might have removed earlier. */
+					return protocol ? protocol[1] + path : path;
+				},
+
+				resolveRelativeModule: function (modulePath, directory) {
+					var result = [],
+						parts = modulePath.split('.'),
+						len = parts.length,
+						relative = (len > 1 && !parts[0]),
+						i = relative ? 0 : -1;
+
+					while(++i < len) { result.push(parts[i] ? parts[i] : '..'); }
+					return util.buildPath(relative ? directory : '', result.join('/'));
+				},
+				resolveModulePath: function (modulePath, directory) {
+					// resolve relative paths
+					if (modulePath.charAt(0) == '.') {
+						return [
+							getModuleDef(util.resolveRelativeModule(modulePath, directory)),
+							getModuleDef(util.resolveRelativeModule(modulePath + '.index', directory))
+						];
+					}
+
+					// resolve absolute paths with respect to jsio packages/
+					var pathSegments = modulePath.split('.');
+					var baseMod = pathSegments[0];
+					var pathString = pathSegments.join('/');
+
+					if (jsioPath.cache.hasOwnProperty(baseMod)) {
+						return [
+							getModuleDef(util.buildPath(jsioPath.cache[baseMod], pathString)),
+							getModuleDef(util.buildPath(jsioPath.cache[baseMod], pathString + '/index'))
+						];
+					}
+
+					var defs = [];
+					var paths = jsioPath.get();
+					var len = paths.length;
+					for (var i = 0; i < len; ++i) {
+						var moduleDef = getModuleDef(util.buildPath(paths[i], pathString));
+						moduleDef.setBase(baseMod, paths[i]);
+						defs.push(moduleDef);
+
+						var moduleDef = getModuleDef(util.buildPath(paths[i], pathString + '/index'));
+						moduleDef.setBase(baseMod, paths[i]);
+						defs.push(moduleDef);
+					}
+					return defs;
+				},
+				splitPath: function(path, result) {
+					if (!result) { result = {}; }
+					var i = path.lastIndexOf('/') + 1;
+					result.directory = path.substring(0, i);
+					result.filename = path.substring(i);
+					return result;
+				}
+			};
+		
+		// construct the top-level jsio object
+		var jsio = util.bind(this, importer, null, null, null);
+
+		jsio.__util = util;
+		jsio.__init__ = init;
+
+		var srcCache;
+		jsio.setCache = function(cache) { srcCache = jsio.__srcCache = cache; }
+		jsio.setCache(cloneFrom && cloneFrom.__srcCache || {});
+
+		jsio.setCachedSrc = function(path, src) { srcCache[path] = { path: path, src: src }; }
+		jsio.getCachedSrc = function(path) { return srcCache[path]; }
+
+		jsio.__filename = 'jsio.js';
+		jsio.__cmds = [];
+		jsio.__jsio = jsio;
+		jsio.__importer = importer;
+		jsio.__modules = {preprocessors:{}};
+		var jsioPath = {
+				set: function(path) { jsioPath.value = (typeof path == 'string' ? [path] : path); },
+				get: function() { return jsioPath.value.slice(0); },
+				add: function(path) {
+					var v = jsioPath.value, len = v.length;
+					for (var i = 0; i < len; ++i) {
+						if (v[i] == path) { return; }
+					}
+					v.push(path);
+				},
+				remove: function(path) {
+					var v = jsioPath.value, len = v.length;
+					for (var i = 0; i < len; ++i) {
+						if (v[i] == path) {
+							v.splice(i, 1);
+						}
+					}
+				},
+				value: [],
+				cache: {}
+			};
+		
+		jsio.path = jsioPath;
+		jsio.addPath = util.bind(jsioPath, 'add');
+		jsio.addCmd = util.bind(jsio.__cmds, 'push');
+		
+		jsio.setEnv = function(envCtor) {
+			if (!envCtor && cloneFrom) {
+				ENV = new cloneFrom.__env.constructor(util);
+			} else {
+				if (typeof envCtor == 'string') {
+					envCtor = ({
+							node: ENV_node,
+							browser: ENV_browser
+						})[envCtor] || ENV_browser;
+				}
+
+				ENV = new envCtor(util);
+			}
+
+			this.__env = ENV;
+			this.__dir = ENV.getCwd();
+			this.path.set(ENV.getPath());
+		}
+		
+		if (cloneFrom) {
+			jsio.setEnv();
+		} else if (typeof process !== 'undefined' && process.version) {
+			jsio.setEnv('node');
+		} else if (typeof XMLHttpRequest != 'undefined' || typeof ActiveXObject != 'undefined') {
+			jsio.setEnv('browser');
+		}
+
+		/*
+		function ENV_abstract() {
+			this.global = null;
+			this.getCwd = function() {};
+			this.getPath = function() {};
+			this.eval = function(code, path) {};
+			this.fetch = function(path) { return contentsOfPath; };
+			this.log = function(args...) {};
+		}
+		*/
+	
+		function ENV_node() {
+			var fs = require('fs');
+			var path = require('path');
+			
+			this.name = 'node';
+			this.global = GLOBAL;
+			this.getCwd = process.cwd;
+			this.pathSep = path.sep;
+
+			this.log = function() {
+				var msg;
+				try {
+					msg = Array.prototype.map.call(arguments, function(a) {
+							if ((a instanceof Error) && a.message) {
+								return 'Error:' + a.message + '\nStack:' + a.stack + '\nArguments:' + a.arguments;
+							}
+							return (typeof a == 'string' ? a : JSON.stringify(a));
+						}).join(' ') + '\n';
+				} catch(e) {
+					msg = Array.prototype.join.call(arguments, ' ') + '\n';
+				}
+
+				process.stderr.write(msg);
+				return msg;
+			}
+			
+			this.getPath = function() {
+				return path.relative(this.getCwd(), path.dirname(__filename) || '.');
+			}
+			
+			if (process.compile) {
+				this.eval = process.compile;
+			} else {
+				var vm = require('vm');
+				this.eval = function (code, path) {
+					try {
+						return vm.runInThisContext(code, path);
+					} catch (e) {
+						this.log('In ' + path + ':\n' + e.message);
+						throw e;
+					}
+				}
+			}
+			
+			this.fetch = function (p) {
+				p = path.resolve(this.getCwd(), p);
+
+				try {
+					var dirname = path.dirname(p);
+					var filename = path.basename(p);
+					var lowerFilename = filename.toLowerCase();
+					var files = fs.readdirSync(dirname);
+				} catch (e) {
+					return false;
+				}
+
+				for (var i = 0, testName; testName = files[i]; ++i) {
+					if (testName.toLowerCase() == lowerFilename && testName != filename) {
+						throw "Invalid case when importing [" + p + "].  You probably meant" + testName;
+					}
+				}
+
+				try {
+					return fs.readFileSync(p, 'utf8');
+				} catch(e) {
+					return false;
+				}
+			}
+			
+			this.require = require;
+		}
+	
+		function ENV_browser() {
+			var XHR = window.XMLHttpRequest || function() { return new ActiveXObject("Msxml2.XMLHTTP"); },
+				cwd = null,
+				path = null,
+				JOIN = Array.prototype.join;
+			
+			this.name = 'browser';
+			this.global = window;
+			this.pathSep = "/";
+
+			if (!this.global.jsio) { this.global.jsio = jsio; }
+		
+			if (window.console && console.log) {
+				if (!console.log.apply || /Android|iPhone|iPad|iPod/.test(navigator.userAgent)) {
+					this.log = function () {
+						var args = JOIN.call(arguments, ' ');
+						console.log(args);
+						return args;
+					}
+				} else {
+					this.log = function () {
+						console.log.apply(console, arguments);
+						return JOIN.call(arguments, ' ');
+					}
+				}
+			} else {
+				this.log = function () { return JOIN.call(arguments, ' '); }
+			}
+
+			this.getCwd = function() {
+				if(!cwd) {
+					var loc = window.location, path = loc.pathname;
+					cwd = loc.protocol + '//' + loc.host + path.substring(0, path.lastIndexOf('/') + 1);
+				}
+				return cwd;
+			}
+		
+			this.getPath = function() {
+				if(!path) {
+					try {
+						var filename = new RegExp('(.*?)' + jsio.__filename + '(\\?.*)?$'),
+							scripts = document.getElementsByTagName('script');
+					
+						for (var i = 0, script; script = scripts[i]; ++i) {
+							var result = script.src.match(filename);
+							if (result) {
+								path = result[1];
+								if (/^[A-Za-z]*:\/\//.test(path)) { path = util.makeRelativePath(path, this.getCwd()); }
+								break;
+							}
+						}
+					} catch(e) {}
+				
+					if(!path) { path = '.'; }
+				}
+				return path;
+			}
+		
+			this.debugPath = function(path) { return path; }
+
+			// IE6 won't return an anonymous function from eval, so use the function constructor instead
+			var rawEval = typeof eval('(function(){})') == 'undefined'
+				? function(src, path) { return (new Function('return ' + src))(); }
+				: function(src, path) { var src = src + '\n//@ sourceURL=' + path; return window.eval(src); };
+
+			// provide an eval with reasonable debugging
+			this.eval = function(code, path, origCode) {
+				try {
+					return rawEval(code, this.debugPath(path));
+				} catch(e) {
+					if(e instanceof SyntaxError) {
+						ENV.log("a syntax error is preventing execution of " + path);
+						if (DEBUG && this.checkSyntax) {
+							this.checkSyntax(origCode, path);
+						}
+					}
+					throw e;
+				}
+			}
+		
+			this.checkSyntax = function(code, path) {
+				try {
+					var syntax = jsio('import util.syntax', {suppressErrors: true, dontExport: true}),
+						result = syntax(code);
+					syntax.display(result, path);
+				} catch(e) {}
+			}
+		
+			this.fetch = function(path) {
+				var xhr = new XHR();
+				try {
+					xhr.open('GET', path, false);
+					xhr.send(null);
+				} catch(e) {
+					ENV.log('e:', e);
+					return false; // firefox file://
+				}
+			
+				if (xhr.status == 404 || // all browsers, http://
+					xhr.status == -1100 || // safari file://
+					// XXX: We have no way to tell in opera if a file exists and is empty, or is 404
+					// XXX: Use flash?
+					//(!failed && xhr.status == 0 && !xhr.responseText && EXISTS)) // opera
+					false)
+				{
+					return false;
+				}
+			
+				return xhr.responseText;
+			}
+		};
+	
+		var preprocessorCheck = /^"use (.*?)"\s*;\s*\n/,
+			preprocessorFunc = /^(.+)\(.+\)$/,
+			failedFetch = {};
+	
+		function findModule(possibilities, opts) {
+			var src;
+			for (var i = 0, possible; possible = possibilities[i]; ++i) {
+				var path = possible.path,
+					cachedVersion = srcCache[path];
+				
+				if (cachedVersion) {
+					possible.src = cachedVersion.src;
+					possible.pre = true;
+					return possible;
+				}
+			
+				/*if (/^\.\//.test(path)) {
+					// remove one path segment for each dot from the cwd 
+					path = addEndSlash(ENV.getCwd()) + path;
+				}*/
+			
+				src = ENV.fetch(path);
+			
+				if (src !== false) {
+					possible.src = src;
+					return possible;
+				} else {
+					failedFetch[path] = true;
+				}
+			}
+		
+			return false;
+		}
+	
+		// load a module from a file
+		function loadModule (fromDir, fromFile, modulePath, opts) {
+			var possibilities = util.resolveModulePath(modulePath, fromDir);
+			for (var i = 0, p; p = possibilities[i]; ++i) {
+				var path = possibilities[i].path;
+				if (!opts.reload && (path in jsio.__modules)) {
+					return possibilities[i];
+				}
+
+				if (path in failedFetch) { possibilities.splice(i--, 1); }
+			}
+		
+			if (!possibilities.length) {
+				if (opts.suppressErrors) { return false; }
+				var e = new Error('Module failed to load (again)');
+				e.jsioLogged = true;
+				throw e;
+			}
+		
+			var moduleDef = findModule(possibilities, opts),
+				match;
+		
+			if (!moduleDef) {
+				if (opts.suppressErrors) { return false; }
+				var paths = [];
+				for (var i = 0, p; p = possibilities[i]; ++i) { paths.push(p.path); }
+				throw new Error(
+					"requested import (" + modulePath + ") not found\n"
+					+ "\tlooked in:\n"
+						+ "\t\t" + paths.join('\n\t\t') + "\n"
+						+ "\tImport Stack:\n"
+						+ "\t\t" + importStack.join("\n\t\t"));
+			}
+		
+			// a (potentially) nicer way to refer to a module -- how it was referenced in code when it was first imported
+			moduleDef.friendlyPath = modulePath;
+			
+			// cache the base module's path in the path cache so we don't have to
+			// try out all paths the next time we see the same base module.
+			if (moduleDef.baseMod && !(moduleDef.baseMod in jsioPath.cache)) {
+				jsioPath.cache[moduleDef.baseMod] = moduleDef.basePath;
+			}
+
+			// don't apply the standard preprocessors to base.js.  If we're reloading
+			// the source code, always apply them.  We also don't want to run them
+			// if they've been run once -- moduleDef.pre is set to true already
+			// if we're reading the code from the source cache.
+			if (modulePath != 'base' && (opts.reload || !opts.dontPreprocess && !moduleDef.pre)) {
+				moduleDef.pre = true;
+
+				applyPreprocessors(fromDir, moduleDef, ["import", "cls"], opts);
+
+				// the order here is somewhat arbitrary and might be overly restrictive (... or overly powerful)
+				// while (moduleDef.src.charAt(0) == '"' && (match = moduleDef.src.match(preprocessorCheck))) {
+				// 	moduleDef.src = moduleDef.src.substring(match[0].length - 1);
+				// 	applyPreprocessors(fromDir, moduleDef, match[1].split(','), opts);
+				// }
+			}
+
+			// any additional preprocessors?
+			if (opts.preprocessors) {
+				applyPreprocessors(fromDir, moduleDef, opts.preprocessors, opts);
+			}
+
+			return moduleDef;
+		}
+	
+		function applyPreprocessors(path, moduleDef, names, opts) {
+			for (var i = 0, len = names.length; i < len; ++i) {
+				p = getPreprocessor(names[i]);
+
+				// if we have a recursive import and p isn't a function, just
+				// skip it (handles the case where a preprocessor imports
+				// other modules).
+				if (p && typeof p == 'function') {
+					p(path, moduleDef, opts);
+				}
+			}
+		}
+		
+		function getPreprocessor(name) {
+			var module = jsio.__modules['preprocessors.' + name];
+			return typeof name == 'function'
+				? name
+				: (module && module.exports
+					|| jsio('import preprocessors.' + name, {dontExport: true, dontPreprocess: true}));
+		}
+	
+		function execModuleDef(context, moduleDef) {
+			var src = moduleDef.src;
+			delete moduleDef.src;
+
+			var code = "(function(_){with(_){delete _;return function $$" + moduleDef.friendlyPath.replace(/[\:\\\/.-]/g, '_') + "(){" + src + "\n}}})";
+			var fn = ENV.eval(code, moduleDef.path, src);
+			fn = fn(context);
+			fn.call(context.exports);
+		};
+		
+		function resolveImportRequest(context, request, opts) {
+			var cmds = jsio.__cmds,
+				imports = [],
+				result = false;
+		
+			for (var i = 0, imp; imp = cmds[i]; ++i) {
+				if ((result = imp(context, request, opts, imports))) { break; }
+			}
+		
+			if (result !== true) {
+				throw new (typeof SyntaxError != 'undefined' ? SyntaxError : Error)(String(result || 'invalid jsio command: jsio(\'' + request + '\')'));
+			}
+		
+			return imports;
+		};
+	
+		function makeContext(ctx, modulePath, moduleDef, dontAddBase) {
+			if (!ctx) { ctx = {}; }
+			if (!ctx.exports) { ctx.exports = {}; }
+
+			ctx.jsio = util.bind(this, importer, ctx, moduleDef.directory, moduleDef.filename);
+			ctx.require = function(request, opts) {
+				if (!opts) { opts = {}; }
+				opts.dontExport = true;
+				// opts.suppressErrors = true;
+				
+				try {
+					var ret = ctx.jsio(request, opts);
+					if (ret === false) {
+						// need this to trigger require attempt due to suppresserrors = true
+						throw "module failed to load";
+					} else {
+						return ret;
+					}
+				} catch(e) {
+					ENV.log('Error loading request ' + request + ':');
+					ENV.log(e);
+				}
+			};
+			
+			ctx.module = {id: modulePath, exports: ctx.exports};
+			if (!dontAddBase && modulePath != 'base') {
+				ctx.jsio('from base import *', {dontPreprocess: true});
+				ctx.logging.__create(modulePath, ctx);
+			}
+		
+			// TODO: FIX for "trailing ." case
+			ctx.jsio.__jsio = jsio;
+			ctx.jsio.__env = jsio.__env;
+			ctx.jsio.__dir = moduleDef.directory;
+			ctx.jsio.__filename = moduleDef.filename;
+			ctx.jsio.path = jsioPath;
+			return ctx;
+		};
+		
+		var importStack = [];
+		function importer(boundContext, fromDir, fromFile, request, opts) {
+			opts = opts || {};
+			fromDir = fromDir || './';
+			fromFile = fromFile || '<initial file>';
+		
+			// importer is bound to a module's (or global) context -- we can override this
+			// by using opts.exportInto
+			var exportInto = opts.exportInto || boundContext || ENV.global;
+		
+			// parse the import request(s)
+			var imports = resolveImportRequest(exportInto, request, opts),
+				numImports = imports.length,
+				retVal = numImports > 1 ? {} : null;
+		
+			// import each requested item
+			for (var i = 0; i < numImports; ++i) {
+				var item = imports[i];
+				var modulePath = item.from;
+				var modules = jsio.__modules;
+				var path;
+				var moduleDef;
+				var err;
+				
+				try {
+					moduleDef = loadModule(fromDir, fromFile, modulePath, opts);
+				} catch(e) {
+					err = e;
+				}
+
+				if (moduleDef) {
+					path = moduleDef.path;
+				} else if (jsio.__env.require) {
+					path = modulePath;
+					try {
+						modules[path] = {exports: jsio.__env.require(modulePath)};
+						err = null;
+					} catch (e2) {
+						if (!err) { err = e2; }
+					}
+				} else if (moduleDef == false) {
+					return false;
+				}
+
+				if (err) {
+					if (opts.suppressErrors) { return false; }
+					if (!err.jsioLogged) {
+						ENV.log(
+							'\nError loading module:\n',
+							'\t[[', request, ']]\n',
+							'\trequested by:', fromDir + fromFile, '\n',
+							'\tcurrent directory:', jsio.__env.getCwd(), '\n',
+							'\t' + err, '\n',
+							'\t' + err.stack);
+						err.jsioLogged = true;
+					}
+
+					throw err;
+				}
+				
+				if (moduleDef) {
+					importStack.push(importStack.length + ' : ' + moduleDef.friendlyPath + ' (' + moduleDef.path + ')');
+				}
+				
+				// eval any packages that we don't know about already
+				if (!(path in modules)) {
+					var newContext = makeContext(opts.context, modulePath, moduleDef, item.dontAddBase);
+
+					modules[path] = moduleDef;
+
+					moduleDef.exports = newContext.exports;
+					if (item.dontUseExports) {
+						var src = [';(function(){'], k = 1;
+						for (var j in item['import']) {
+							newContext.exports[j] = undefined;
+							src[k++] = 'if(typeof '+j+'!="undefined"&&exports.'+j+'==undefined)exports.'+j+'='+j+';';
+						}
+						src[k] = '})();';
+						moduleDef.src += src.join('');
+					}
+
+					execModuleDef(newContext, moduleDef);
+					moduleDef.exports = newContext.exports;
+				}
+				
+				importStack.pop();
+			
+				var module = modules[path].exports;
+			
+				// return the module if we're only importing one module
+				if (numImports == 1) { retVal = module; }
+			
+				if (!opts.dontExport) {
+					// add the module to the current context
+					if (item.as) {
+						// remove trailing/leading dots
+						var as = item.as.match(/^\.*(.*?)\.*$/)[1],
+							segments = as.split('.'),
+							kMax = segments.length - 1,
+							c = exportInto;
+				
+						// build the object in the context
+						for(var k = 0; k < kMax; ++k) {
+							var segment = segments[k];
+							if (!segment) continue;
+							if (!c[segment]) { c[segment] = {}; }
+							c = c[segment];
+						}
+					
+						c[segments[kMax]] = module;
+				
+						// there can be multiple module imports with this syntax (import foo, bar)
+						if (numImports > 1) {
+							retVal[as] = module;
+						}
+					} else if (item['import']) {
+						// there can only be one module import with this syntax 
+						// (from foo import bar), so retVal will already be set here
+						if (item['import']['*']) {
+							for (var k in modules[path].exports) { exportInto[k] = module[k]; }
+						} else {
+							for (var k in item['import']) { exportInto[item['import'][k]] = module[k]; }
+						}
+					}
+				}
+			}
+		
+			return retVal;
+		}
+	
+		// DEFINE SYNTAX FOR JSIO('cmd')
+	
+		// from myPackage import myFunc
+		// external myPackage import myFunc
+		jsio.addCmd(function(context, request, opts, imports) {
+			var match = request.match(/^\s*(from|external)\s+([\w.$]+)\s+(import|grab)\s+(.*)$/);
+			if(match) {
+				imports.push({
+					from: match[2],
+					dontAddBase: match[1] == 'external',
+					dontUseExports: match[3] == 'grab' || match[1] == 'external',
+					'import': {}
+				});
+			
+				match[4].replace(/\s*([\w.$*]+)(?:\s+as\s+([\w.$]+))?/g, function(_, item, as) {
+					imports[0]['import'][item] = as || item;
+				});
+				return true;
+			}
+		});
+
+		// import myPackage
+		jsio.addCmd(function(context, request, opts, imports) {
+			var match = request.match(/^\s*import\s+(.*)$/);
+			if (match) {
+				match[1].replace(/\s*([\w.$]+)(?:\s+as\s+([\w.$]+))?,?/g, function(_, fullPath, as) {
+					imports.push(
+						as ? {
+							from: fullPath,
+							as: as
+						} : {
+							from: fullPath,
+							as: fullPath
+						});
+				});
+				return true;
+			}
+		});
+
+		// CommonJS syntax
+		jsio.addCmd(function(context, request, opts, imports) {
+		
+			//		./../b -> ..b
+			// 		../../b -> ...b
+			// 		../b -> ..b
+			// 		./b -> .b
+		
+			var match = request.match(/^\s*[\w.0-9$\/\-]+\s*$/);
+			if (match) {
+			
+				var req = util.resolveRelativePath(match[0]),
+					isRelative = req.charAt(0) == '.';
+			
+				req = req
+					// .replace(/^\//, '') // remove any leading slash
+					.replace(/\.\.\//g, '.') // replace relative path indicators with dots
+					.replace(/\.\//g, '')
+					.replace(/\//g, '.'); // any remaining slashes are path separators
+
+				imports[0] = { from: (isRelative ? '.' : '') + req };
+				return true;
+			}
+		});
+		
+		jsio.install = function() {
+			jsio('from base import *');
+			GLOBAL['logger'] = logging.get('jsiocore');
+		};
+
+		jsio.eval = function (src, path) {
+			path = ENV.getCwd() || '/';
+			var moduleDef = new ModuleDef(path);
+			moduleDef.src = src;
+			applyPreprocessors(path, moduleDef, ["import", "cls"], {});
+			execModuleDef(ENV.global, moduleDef);
+		};
+		
+		jsio.clone = util.bind(null, init, jsio);
+
+		return jsio;
+	}
+
+	var J = init(null, {});
+	if (typeof exports != 'undefined') {
+		module.exports = J;
+	} else {
+		jsio = J;
+	}
+})();
+jsio.path.set(["sdk/jsio",".","sdk/gc/api/","sdk/","sdk/timestep/"]);jsio.path.cache={"preprocessors":"sdk/jsio","base":"sdk/jsio","util":"sdk/jsio","gc":"sdk/"};jsio.setCache({"sdk/jsio/base.js":{"path":"sdk/jsio/base.js","friendlyPath":"base","directory":"sdk/jsio/","filename":"base.js","baseMod":"base","basePath":"sdk/jsio","src":"/**\n * base.js\n * This file contains all global functions provided by js.io.\n */\n\nexports.log = jsio.__env.log;\nexports.GLOBAL = jsio.__env.global;\n\n/**\n * Various polyfill methods to ensure js.io implementations provide\n * a baseline of JavaScript functionality. Feature compatibility (localStorage,\n * etc.) should be provided elsewhere.\n */\n\n// Array.isArray\n// Not available before ECMAScript 5.\n// https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Array/isArray\n\nif (!Array.isArray) {\n\tArray.isArray = function (arg) {\n\t\treturn Object.prototype.toString.call(arg) === '[object Array]';\n\t}\n};\n\n// Function.prototype.bind\n// Not available before ECMAScript 5.\n// https://developer.mozilla.org/en/JavaScript/Reference/Global_Objects/Function/bind\n\nif (!Function.prototype.bind) {\n  Function.prototype.bind = function (oThis) {\n    if (typeof this !== \"function\") {\n      // closest thing possible to the ECMAScript 5 internal IsCallable function\n      throw new TypeError(\"Function.prototype.bind - what is trying to be bound is not callable\");\n    }\n\n    var aArgs = Array.prototype.slice.call(arguments, 1), \n        fToBind = this, \n        fNOP = function () {},\n        fBound = function () {\n          return fToBind.apply(this instanceof fNOP\n                                 ? this\n                                 : oThis,\n                               aArgs.concat(Array.prototype.slice.call(arguments)));\n        };\n\n    fNOP.prototype = this.prototype;\n    fBound.prototype = new fNOP();\n\n    return fBound;\n  };\n}\n\n/**\n * DEPRECATED. Old js.io polyfills.\n */\n\nvar SLICE = Array.prototype.slice;\n\n/* Use native isArray if available\n */\nif (typeof Array.isArray === 'function') {\n\texports.isArray = Array.isArray;\n} else {\n\texports.isArray = function (obj) {\n\t\treturn Object.prototype.toString.call(obj) === '[object Array]';\n\t}\n}\n\nexports.bind = function(context, method /*, VARGS*/) {\n\tif(arguments.length > 2) {\n\t\tvar args = SLICE.call(arguments, 2);\n\t\treturn typeof method == 'string'\n\t\t\t? function __bound() {\n\t\t\t\tif (context[method]) {\n\t\t\t\t\treturn context[method].apply(context, args.concat(SLICE.call(arguments, 0)));\n\t\t\t\t} else {\n\t\t\t\t\tthrow logger.error('No method:', method, 'for context', context);\n\t\t\t\t}\n\t\t\t}\n\t\t\t: function __bound() { return method.apply(context, args.concat(SLICE.call(arguments, 0))); }\n\t} else {\n\t\treturn typeof method == 'string'\n\t\t\t? function __bound() {\n\t\t\t\tif (context[method]) {\n\t\t\t\t\treturn context[method].apply(context, arguments);\n\t\t\t\t} else {\n\t\t\t\t\tthrow logger.error('No method:', method, 'for context', context);\n\t\t\t\t}\n\t\t\t}\n\t\t\t: function __bound() { return method.apply(context, arguments); }\n\t}\n}\n\n/**\n * Class constructor.\n */\n\nexports.Class = function(name, parent, proto) {\n\treturn exports.__class__(function() { return this.init && this.init.apply(this, arguments); }, name, parent, proto);\n}\n\nexports.__class__ = function (cls, name, parent, proto) {\n\tvar clsProto = function () {};\n\tvar logger;\n\n\tif (typeof name != 'string') {\n\t\tproto = parent;\n\t\tparent = name;\n\t\tname = null;\n\t}\n\n\tif (name) {\n\t\tlogger = exports.logging.get(name);\n\t}\n\n\tif (!parent) { throw new Error('parent or prototype not provided'); }\n\tif (!proto) { proto = parent; parent = null; }\n\n\tif (parent) {\n\t\tif (exports.isArray(parent)) { // multiple inheritance, use at your own risk =)\n\t\t\tclsProto.prototype = {};\n\t\t\tfor(var i = 0, p; p = parent[i]; ++i) {\n\t\t\t\tif (p == Error && ErrorParentClass) { p = ErrorParentClass; }\n\t\t\t\tfor (var item in p.prototype) {\n\t\t\t\t\tif (!(item in clsProto.prototype)) {\n\t\t\t\t\t\tclsProto.prototype[item] = p.prototype[item];\n\t\t\t\t\t}\n\t\t\t\t}\n\t\t\t}\n\t\t\tparent = parent[0];\n\t\t} else {\n\t\t\tif (parent == Error && ErrorParentClass) { parent = ErrorParentClass; }\n\t\t\tclsProto.prototype = parent.prototype;\n\t\t}\n\t}\n\t\n\tvar supr = parent ? function(context, method, args) {\n\t\t\tvar f = parent.prototype[method];\n\t\t\tif (!f) { throw new Error('method ' + method + ' does not exist'); }\n\t\t\treturn f.apply(context, args || []);\n\t\t} : null;\n\t\n\tvar p = cls.prototype = new clsProto();\n\tp.constructor = cls;\n\tp.__parentClass__ = parent;\n\tif (name) { p.__class__ = name; }\n\tproto.call(p, logger || supr, logger && supr);\n\treturn cls;\n}\n\nvar ErrorParentClass = exports.__class__(function ErrorCls() {\n\t\tvar err = Error.prototype.constructor.apply(this, arguments);\n\t\tfor (var prop in err) {\n\t\t\tif (err.hasOwnProperty(prop)) {\n\t\t\t\tthis[prop] = err[prop];\n\t\t\t}\n\t\t}\n\t}, function() {});\n\n/**\n * Merge two objects together.\n */\n\nexports.Class.defaults = \nexports.merge = function(base, extra) {\n\tbase = base || {};\n\t\n\tfor (var i = 1, len = arguments.length; i < len; ++i) {\n\t\tvar copyFrom = arguments[i];\n\t\tfor (var key in copyFrom) {\n\t\t\tif (copyFrom.hasOwnProperty(key) && !base.hasOwnProperty(key)) {\n\t\t\t\tbase[key] = copyFrom[key];\n\t\t\t}\n\t\t}\n\t}\n\t\n\treturn base;\n}\n\n/**\n * Create a timer delay.\n */\n\nexports.delay = function(orig, timeout) {\n\tvar _timer = null;\n\tvar ctx, args;\n\tvar f = function() { orig.apply(ctx, args); }\n\treturn function() {\n\t\tctx = this;\n\t\targs = arguments;\n\t\tif (_timer) { clearTimeout(_timer); }\n\t\t_timer = setTimeout(f, timeout || 0);\n\t}\n}\n\n/**\n * Log constructor and default \"logger\".\n */\n\nexports.logging = (function() {\n\t\n\t// logging namespace, this is what is exported\n\tvar logging = {\n\t\t\tDEBUG: 1,\n\t\t\tLOG: 2,\n\t\t\tINFO: 3,\n\t\t\tWARN: 4,\n\t\t\tERROR: 5,\n\t\t\tNONE: 10\n\t\t},\n\t\tloggers = {}, // effectively globals - all loggers and a global production state\n\t\tproduction = false;\n\tvar gPrefix = '';\n\tlogging.setPrefix = function(prefix) { gPrefix = prefix + ' '; }\n\tlogging.setProduction = function(prod) { production = !!prod; }\n\tlogging.get = function(name) {\n\t\treturn loggers.hasOwnProperty(name) ? loggers[name]\n\t\t\t: (loggers[name] = new Logger(name));\n\t}\n\tlogging.set = function(name, _logger) {\n\t\tloggers[name] = _logger;\n\t}\n\t\n\tlogging.getAll = function() { return loggers; }\n\n\tlogging.__create = function(pkg, ctx) { ctx.logger = logging.get(pkg); }\n\t\n\tvar Logger = exports.__class__(\n\t\tfunction Logger(name, level) {\n\t\t\tthis._name = name;\n\t\t\tthis._level = level || logging.LOG;\n\t\t},\n\t\tfunction () {\n\t\t\tthis.setLevel = function(level) { this._level = level; }\n\t\t\n\t\t\tfunction makeLogFunction(level, type) {\n\t\t\t\treturn function() {\n\t\t\t\t\tif (!production && level >= this._level) {\n\t\t\t\t\t\tvar prefix = type + ' ' + gPrefix + this._name,\n\t\t\t\t\t\t\tlistener = this._listener || exports.log;\n\t\t\t\t\t\t\n\t\t\t\t\t\treturn listener && listener.apply(this._listener, [prefix].concat(SLICE.call(arguments)));\n\t\t\t\t\t}\n\t\t\t\t\treturn arguments[0];\n\t\t\t\t}\n\t\t\t}\n\t\t\n\t\t\tthis.setListener = function(listener) { this._listener = listener; }\n\t\t\tthis.debug = makeLogFunction(logging.DEBUG, \"DEBUG\");\n\t\t\tthis.log = makeLogFunction(logging.LOG, \"LOG\");\n\t\t\tthis.info = makeLogFunction(logging.INFO, \"INFO\");\n\t\t\tthis.warn = makeLogFunction(logging.WARN, \"WARN\");\n\t\t\tthis.error = makeLogFunction(logging.ERROR, \"ERROR\");\n\t\t});\n\n\treturn logging;\n})();\n\nvar logger = exports.logging.get('jsiocore');\n"},"sdk/gc/browser/bootstrap/launchBrowser.js":{"path":"sdk/gc/browser/bootstrap/launchBrowser.js","friendlyPath":"gc.browser.bootstrap.launchBrowser","directory":"sdk/gc/browser/bootstrap/","filename":"launchBrowser.js","baseMod":"gc","basePath":"sdk/","src":"/** @license\n * This file is part of the Game Closure SDK.\n *\n * The Game Closure SDK is free software: you can redistribute it and/or modify\n * it under the terms of the Mozilla Public License v. 2.0 as published by Mozilla.\n\n * The Game Closure SDK is distributed in the hope that it will be useful,\n * but WITHOUT ANY WARRANTY; without even the implied warranty of\n * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the\n * Mozilla Public License v. 2.0 for more details.\n\n * You should have received a copy of the Mozilla Public License v. 2.0\n * along with the Game Closure SDK.  If not, see <http://mozilla.org/MPL/2.0/>.\n */\n\n// this file bootstraps the loading screen in a web browser\n\nwindow._continueLoad();\n","pre":true}});</script><script>IMG_CACHE={"spritesheets/map.json":"{\"resources/images/board.gif\":{}}"};window.addEventListener("load", function(event) { if (/Kik/.test(navigator.userAgent) && /Android/.test(navigator.userAgent)) { var el = document.getElementById("_GCSplash"); var w = window.innerWidth; el.style.width = w + "px"; var h = window.innerHeight; el.style.height = h + "px"; } }, false);</script></html>
