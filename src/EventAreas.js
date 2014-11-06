@@ -40,10 +40,16 @@ exports = Class(function(){
 
 var Box = Class(function(){
 
+
+    //var value = 0 ;
+
+
 	this.init = function(paramObj){
 		this.height=paramObj.height;
 		this.width=paramObj.width;
 		this.view=paramObj.view;
+		this.value=this.value || 0;
+		console.log('creating');
 	};
 	
 	
@@ -55,10 +61,15 @@ var Box = Class(function(){
 			width: this.width,
 			height: this.height,
 		});
-		view.on('InputStart', function(event, point){		
+		view.on('InputStart', bind(this, function(event, point){		
 		  var game=new Game(view);	
-		  game.render("cross");						  
-		});			
+		  game.render("cross");	
+		  
+		  
+		  this.value ++;
+		  console.log(this.value);
+		  					  
+		}));			
 	};
 
 });

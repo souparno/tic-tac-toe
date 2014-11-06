@@ -26,5 +26,13 @@ exports = Class(function(){
 		});
 	    
 	};
+	
+	
+	this.onInputStart = function(){
+		this.value=this.value || 0;
+		this.value ++;
+		alert(this.value);
+	}
+	
 
 });
