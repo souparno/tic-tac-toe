@@ -41,15 +41,11 @@ exports = Class(function(){
 var Box = Class(function(){
 
 
-    //var value = 0 ;
-
-
 	this.init = function(paramObj){
 		this.height=paramObj.height;
 		this.width=paramObj.width;
 		this.view=paramObj.view;
-		this.value=this.value || 0;
-		console.log('creating');
+		this.playerMove = "cross";
 	};
 	
 	
@@ -62,12 +58,14 @@ var Box = Class(function(){
 			height: this.height,
 		});
 		view.on('InputStart', bind(this, function(event, point){		
+		  		  
+		  
 		  var game=new Game(view);	
-		  game.render("cross");	
+		  game.render(this.playerMove);	
 		  
+		  if(this.playerMove == "cross") this.playerMove="circle";
+		  else this.playerMove="cross";
 		  
-		  this.value ++;
-		  console.log(this.value);
 		  					  
 		}));			
 	};
