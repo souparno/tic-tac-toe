@@ -1,7 +1,7 @@
 {
 	"appID": "62364cb865664da590013152c2662a6f",
-	"shortName": "tic-tac-toe",
-	"title": "tic-tac-toe",
+	"shortName": "tic_tac_toe",
+	"title": "tic_tac_toe",
 	"studio": {
 		"name": "Example Studio Name",
 		"domain": "studio.example.com",

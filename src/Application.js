@@ -12,7 +12,7 @@ exports = Class(GC.Application, function () {
             y: 0,
             scale: 0.75,
             layout: "box",
-            image: "resources/images/board.gif"
+            image: "resources/images/board.png"
         });
 
 
