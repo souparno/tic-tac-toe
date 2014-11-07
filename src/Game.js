@@ -6,16 +6,11 @@ exports = Class(function(){
 	
 	this.init=function(view){
 		
-		
-		console.log(view.style);
-		
 		this._view_superview=view;
 		this._view_width=view.style.width;
 		this._view_height=view.style.height;
 		this._view_x=view.style.x;
 		this._view_y=view.style.y;
-		
-		console.log(" the super view is "+this._view_superview+" width "+this._view_width+" height "+this._view_height+" x "+this._view_x+" y "+this._view_y);
 		
 	}
 		

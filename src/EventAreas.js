@@ -63,8 +63,7 @@ var Box = Class(function(){
 		});
 		
 		
-		view.on('InputStart',bind(this,function(){
-		   console.log("You just clicked on one of the squares");			
+		view.on('InputStart',bind(this,function(){		
 		   
 		   var game=new Game(view);	
 		   game.render(this.playerMove);	
