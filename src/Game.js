@@ -5,12 +5,18 @@ exports = Class(function(){
 	
 	
 	this.init=function(view){
-	  
-		this._view_superview=view.style._superview;
-		this._view_width=view.style._width;
-		this._view_height=view.style._height;
+		
+		
+		console.log(view.style);
+		
+		this._view_superview=view;
+		this._view_width=view.style.width;
+		this._view_height=view.style.height;
 		this._view_x=view.style.x;
 		this._view_y=view.style.y;
+		
+		console.log(" the super view is "+this._view_superview+" width "+this._view_width+" height "+this._view_height+" x "+this._view_x+" y "+this._view_y);
+		
 	}
 		
 	//shows a circle or cross.
@@ -20,8 +26,6 @@ exports = Class(function(){
 			superview: this._view_superview,
 			width:this._view_width,
 			height:this._view_height,
-			x: this._view_x,
-			y: this._view_y,
 			image: "resources/images/"+option+".png"
 		});
 	    

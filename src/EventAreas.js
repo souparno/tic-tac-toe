@@ -50,24 +50,30 @@ var Box = Class(function(){
 	
 	
 	this.render = function(x,y){
+		
+		
+		
 		var view = new View({
 			superview: this.view,
 			x: x,
 			y: y,
 			width: this.width,
 			height: this.height,
+			backgroundColor : "#FF0000"
 		});
-		view.on('InputStart', bind(this, function(event, point){		
-		  		  
+		
+		
+		view.on('InputStart',bind(this,function(){
+		   console.log("You just clicked on one of the squares");			
+		   
+		   var game=new Game(view);	
+		   game.render(this.playerMove);	
 		  
-		  var game=new Game(view);	
-		  game.render(this.playerMove);	
-		  
-		  if(this.playerMove == "cross") this.playerMove="circle";
-		  else this.playerMove="cross";
-		  
-		  					  
-		}));			
+		   if(this.playerMove == "cross") this.playerMove="circle";
+		   else this.playerMove="cross";		  
+		   
+		})); 		  
+		
 	};
 
 });

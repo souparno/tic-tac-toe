@@ -1,0 +1,15 @@
+CACHE MANIFEST
+
+#62364cb865664da590013152c2662a6f version debug
+
+CACHE:
+
+spritesheets/resources-images0.png
+spritesheets/resources-images1.png
+index.html
+native-android.js
+
+FALLBACK:
+
+NETWORK:
+*
