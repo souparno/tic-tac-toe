@@ -10,27 +10,39 @@ exports = Class(GC.Application, function () {
             superview: this.view,
             x: 0,
             y: 0,
-            scale: 0.75,
+            //scale: 0.75,
             layout: "box",
             image: "resources/images/board.png"
         });
 
+
+
+        var boundsWidth = 576;
+        var boundsHeight = 1024;
+        
+        
+        var baseWidth = boundsWidth; //576
+		var baseHeight =  device.screen.height * (boundsWidth / device.screen.width); //864
+		var scale = device.screen.width / baseWidth; //1
+        
 
         var eventAreas = new EventAreas({
             maxHorizontal_box: 3,
             maxVertical_box: 3,
             box: {
 				view:this.view,
-                height: 80,
-                width: 75
+                height: 140*scale,
+                width: 140*scale
             },
             margin: {
-                left: 10,
-                top: 10
+                left: 10*scale,
+                top: 10*scale
             },
-            x: 40,
-            y: 65
-        }).create(9);        
+            x: 80*scale,
+            y: 130*scale
+        }).create(9);    
+        
+            
     };
     
     
